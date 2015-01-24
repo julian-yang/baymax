@@ -62,7 +62,8 @@ class MyParser {
 	"Notation",
     };
     
-
+    static Hashtable<String, Boolean> userList;
+    
     static class MyErrorHandler implements ErrorHandler {
         
         public void warning(SAXParseException exception)
@@ -191,6 +192,14 @@ class MyParser {
         FileWriter users = createCSVFile("Users.csv");
         FileWriter bids = createCSVFile("Bids.csv");
         
+        Element itemsElem = doc.getDocumentElement();
+        Element[] itemList = getElementsByTagNameNR(itemsElem, "Item");
+        System.out.println("There are " + itemList.length + " <item> tags");
+        
+        for (Element curItem : itemList) {
+            processItem(curItem);
+        }
+
         //close the csv files
         try {
             items.flush();
@@ -209,6 +218,26 @@ class MyParser {
         }
         /**************************************************************/
         
+    }
+
+    static void processItem(Element curItem) {
+        String itemRow = "";
+        System.out.println("Try to get itemid: " + getAttributeText(curItem, "ItemID"));
+        //for each itemCategory
+
+        //check if we need to insert new user
+
+        //for each bid
+
+        
+    }
+
+    static String getAttributeText(Element e, String attrName) {
+        Node attr = e.getAttributes().getNamedItem(attrName);
+        if(attr != null) 
+            return attr.getNodeValue();
+        else
+            return "";
     }
     static void writeLine(FileWriter writer, String line) {
         try {
@@ -241,6 +270,7 @@ class MyParser {
             factory.setIgnoringElementContentWhitespace(true);      
             builder = factory.newDocumentBuilder();
             builder.setErrorHandler(new MyErrorHandler());
+            userList = new Hashtable<String, Boolean>();
         }
         catch (FactoryConfigurationError e) {
             System.out.println("unable to get a document builder factory");
