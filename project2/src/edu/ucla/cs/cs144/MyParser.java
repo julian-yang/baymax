@@ -63,7 +63,12 @@ class MyParser {
     };
     
     static Hashtable<String, Boolean> userList;
-    
+    static FileWriter items;
+    static FileWriter itemCategories;
+    static FileWriter users;
+    static FileWriter bids;
+
+
     static class MyErrorHandler implements ErrorHandler {
         
         public void warning(SAXParseException exception)
@@ -187,10 +192,10 @@ class MyParser {
         
         //open each CSV file (creates it if it doesn't exist)
         System.out.println("creating csv file");
-        FileWriter items = createCSVFile("Items.csv");
-        FileWriter itemCategories = createCSVFile("ItemCategories.csv");
-        FileWriter users = createCSVFile("Users.csv");
-        FileWriter bids = createCSVFile("Bids.csv");
+        items = createCSVFile("Items.csv");
+        itemCategories = createCSVFile("ItemCategories.csv");
+        users = createCSVFile("Users.csv");
+        bids = createCSVFile("Bids.csv");
         
         Element itemsElem = doc.getDocumentElement();
         Element[] itemList = getElementsByTagNameNR(itemsElem, "Item");
@@ -222,7 +227,24 @@ class MyParser {
 
     static void processItem(Element curItem) {
         String itemRow = "";
-        System.out.println("Try to get itemid: " + getAttributeText(curItem, "ItemID"));
+
+        //get the itemID
+        String itemID = getAttributeText(curItem, "ItemID");
+        itemRow += wrapQuotations(itemID) + ", ";
+        
+        //get the name of item
+        String name = getElementTextByTagNameNR(curItem, "Name");
+        itemRow += wrapQuotations(name) + ", ";
+
+        //get Buy_Price, just put in the "" if it doesn't exist.
+        String buyPrice = getElementTextByTagNameNR(curItem, "Buy_Price");
+        itemRow += wrapQuotations(buyPrice) + ", ";
+
+        //get 
+        System.out.println("itemid: " + itemID);
+        System.out.println("name: " + name);
+
+        System.out.println("SQL line: " + itemRow);
         //for each itemCategory
 
         //check if we need to insert new user
@@ -232,6 +254,13 @@ class MyParser {
         
     }
 
+    //wraps quotations around the String text
+    static String wrapQuotations(String text) {
+        return "\"" + text + "\"";
+    }
+
+    //gets the attribute text from a given Element e
+    //it returns null if the attribute does not exist
     static String getAttributeText(Element e, String attrName) {
         Node attr = e.getAttributes().getNamedItem(attrName);
         if(attr != null) 
@@ -239,6 +268,8 @@ class MyParser {
         else
             return null;
     }
+
+    //write a single line in a FileWriter writer for given String line
     static void writeLine(FileWriter writer, String line) {
         try {
             writer.append(line + '\n');
@@ -246,6 +277,8 @@ class MyParser {
             e.printStackTrace();
         }
     }
+
+    //creates/opens the csv file of name fileName
     static FileWriter createCSVFile(String fileName) {
         FileWriter temp = null;
         try {
