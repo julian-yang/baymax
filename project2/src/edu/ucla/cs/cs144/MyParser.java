@@ -62,6 +62,7 @@ class MyParser {
 	"Notation",
     };
     
+
     static class MyErrorHandler implements ErrorHandler {
         
         public void warning(SAXParseException exception)
@@ -183,10 +184,48 @@ class MyParser {
         /* Fill in code here (you will probably need to write auxiliary
             methods). */
         
+        //open each CSV file (creates it if it doesn't exist)
+        System.out.println("creating csv file");
+        FileWriter items = createCSVFile("Items.csv");
+        FileWriter itemCategories = createCSVFile("ItemCategories.csv");
+        FileWriter users = createCSVFile("Users.csv");
+        FileWriter bids = createCSVFile("Bids.csv");
         
-        
+        //close the csv files
+        try {
+            items.flush();
+            items.close();
+
+            itemCategories.flush();
+            itemCategories.close();
+            
+            users.flush();
+            users.close();
+            
+            bids.flush();
+            bids.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
         /**************************************************************/
         
+    }
+    static void writeLine(FileWriter writer, String line) {
+        try {
+            writer.append(line + '\n');
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+    static FileWriter createCSVFile(String fileName) {
+        FileWriter temp = null;
+        try {
+            temp = new FileWriter(fileName, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(3);
+        }
+        return temp;
     }
     
     public static void main (String[] args) {
