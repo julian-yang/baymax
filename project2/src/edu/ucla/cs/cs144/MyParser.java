@@ -237,7 +237,7 @@ class MyParser {
         if(attr != null) 
             return attr.getNodeValue();
         else
-            return "";
+            return null;
     }
     static void writeLine(FileWriter writer, String line) {
         try {
