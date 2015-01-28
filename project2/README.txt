@@ -15,7 +15,7 @@ Part B:
         -Seller [UserID]
         
     ItemCategory
-        *ItemID
+        *ItemID [ItemID]
         *Category
 
     Users

@@ -191,10 +191,10 @@ class MyParser {
             methods). */
         
         //open each CSV file (creates it if it doesn't exist)
-        System.out.println("creating csv file");
-        itemWriter = createCSVFile("Items.csv");
-        itemCategoriesWriter = createCSVFile("ItemCategories.csv");
-        bidWriter = createCSVFile("Bids.csv");
+        System.out.println("creating dat file");
+        itemWriter = createCSVFile("Items.dat");
+        itemCategoriesWriter = createCSVFile("ItemCategories.dat");
+        bidWriter = createCSVFile("Bids.dat");
         
         Element itemsElem = doc.getDocumentElement();
         Element[] itemList = getElementsByTagNameNR(itemsElem, "Item");
@@ -205,7 +205,7 @@ class MyParser {
         }
 
         
-        //close the csv files
+        //close the dat files
         try {
             itemWriter.flush();
             itemWriter.close();
@@ -227,42 +227,46 @@ class MyParser {
 
         //get the item columns
         String itemID = getAttributeText(curItem, "ItemID");
-        itemRow += wrapQuotations(itemID) + ", ";
+        itemRow += itemID + ",";
         
         String name = getElementTextByTagNameNR(curItem, "Name");
-        itemRow += wrapQuotations(name) + ", ";
+        itemRow += wrapQuotations(name) + ",";
 
         //get Buy_Price, just put in the "" if it doesn't exist.
         String buyPrice = strip(getElementTextByTagNameNR(curItem, "Buy_Price"));
-        itemRow += wrapQuotations(buyPrice) + ", ";
+        if(!buyPrice.equals(""))
+            itemRow += buyPrice + ",";
+        else
+            itemRow += "NULL,";
 
         //get First_Bid, just put in the "" if it doesn't exist.
         String firstBid = strip(getElementTextByTagNameNR(curItem, "First_Bid"));
-        itemRow += wrapQuotations(firstBid) + ", ";
+        itemRow += firstBid + ",";
 
         String started = convertToSQLTime(getElementTextByTagNameNR(curItem, "Started"));
-        itemRow += wrapQuotations(started) + ", ";
+        itemRow += wrapQuotations(started) + ",";
 
         String ends = convertToSQLTime(getElementTextByTagNameNR(curItem, "Ends"));
-        itemRow += wrapQuotations(ends) + ", ";
+        itemRow += wrapQuotations(ends) + ",";
 
         Element locationElem = getElementByTagNameNR(curItem, "Location");
-        String location = getElementText(locationElem);
-        itemRow += wrapQuotations(location) + ", ";
 
         String latitude = getAttributeText(locationElem, "Latitude");
-        itemRow += wrapQuotations(latitude) + ", ";
+        itemRow += wrapQuotations(latitude) + ",";
 
         String longitude = getAttributeText(locationElem, "Longitude");
-        itemRow += wrapQuotations(longitude) + ", ";
+        itemRow += wrapQuotations(longitude) + ",";
+
+        String location = getElementText(locationElem);
+        itemRow += wrapQuotations(location) + ",";
 
         String country = getElementTextByTagNameNR(curItem, "Country");
-        itemRow += wrapQuotations(country) + ", ";
+        itemRow += wrapQuotations(country) + ",";
 
         String description = getElementTextByTagNameNR(curItem, "Description");
         description = description.substring(0, 
                 Math.min(description.length(), 4000));
-        itemRow += wrapQuotations(description) + ", ";
+        itemRow += wrapQuotations(description) + ",";
 
         Element sellerElem = getElementByTagNameNR(curItem, "Seller");
         String sellerID = getAttributeText(sellerElem, "UserID");
@@ -275,17 +279,17 @@ class MyParser {
         if(sellerRow == null) {
             sellerRow = new String[5];
             sellerRow[0] = sellerID;
-            sellerRow[1] = "";
+            sellerRow[1] = "NULL";
             sellerRow[2] = sellerRating;
             sellerRow[3] = "";
             sellerRow[4] = "";
             userList.put(sellerID, sellerRow);
         } else {
             sellerRow[2] = sellerRating;
-            if(!sellerRow[1].equals(""))
-                bothSellerAndBuyer.add(sellerID);
+            //if(sellerRow[1] != null)
+            //    bothSellerAndBuyer.add(sellerID);
         }
-        //String sellerRow = wrapQuotations(seller) + ", " + wrapQuotations(sellerRating);
+        //String sellerRow = wrapQuotations(seller) + "," + wrapQuotations(sellerRating);
         
         //System.out.println("itemid: " + itemID);
         //System.out.println("name: " + name);
@@ -306,7 +310,7 @@ class MyParser {
         Element [] categories = getElementsByTagNameNR(curItem, "Category");
         for(Element category : categories) {
             String categoryName = getElementText(category);
-            String categoryRow = wrapQuotations(itemID) + ", " 
+            String categoryRow = wrapQuotations(itemID) + "," 
                 + wrapQuotations(categoryName);
             writeLine(itemCategoriesWriter, categoryRow);
         }
@@ -330,7 +334,7 @@ class MyParser {
                 bidderRow = new String[5];
                 bidderRow[0] = bidderID;
                 bidderRow[1] = bidderRating;
-                bidderRow[2] = "";
+                bidderRow[2] = "NULL";
                 bidderRow[3] = bidderLocation;
                 bidderRow[4] = bidderCountry;
                 userList.put(bidderID, bidderRow);
@@ -338,15 +342,15 @@ class MyParser {
                 bidderRow[1] = bidderRating;
                 bidderRow[3] = bidderLocation;
                 bidderRow[4] = bidderCountry;
-                if(!bidderRow[2].equals(""))
-                    bothSellerAndBuyer.add(bidderID);
+                //if(!bidderRow[2].equals("NULL"))
+                //    bothSellerAndBuyer.add(bidderID);
             }
             
             String bidTime = 
                 convertToSQLTime(getElementTextByTagNameNR(bid, "Time"));
             String amount = strip(getElementTextByTagNameNR(bid, "Amount"));
-            String bidRow = wrapQuotations(bidderID) + ", " 
-                + wrapQuotations(itemID) + ", " + wrapQuotations(bidTime) + ", "
+            String bidRow = wrapQuotations(bidderID) + "," 
+                + itemID + "," + wrapQuotations(bidTime) + ","
                 + wrapQuotations(amount);
 
             writeLine(bidWriter, bidRow);
@@ -357,20 +361,20 @@ class MyParser {
     }
     
     static void writeUsersToFile() {
-        userWriter = createCSVFile("Users.csv");
+        userWriter = createCSVFile("Users.dat");
         //write the list of users to file
         System.out.println("Users that are both seller and buyer BUT different ratings: ");
         Enumeration<String> keys = userList.keys();
         while(keys.hasMoreElements()) {
             String curUserID = keys.nextElement();
             String curUser [] = userList.get(curUserID);
-            String userRow = wrapQuotations(curUser[0]) + ", " 
-                + wrapQuotations(curUser[1]) + ", " + wrapQuotations(curUser[2])
-                + ", " + wrapQuotations(curUser[3]) + ", " 
+            String userRow = wrapQuotations(curUser[0]) + "," 
+                + curUser[1] + "," + curUser[2]
+                + "," + wrapQuotations(curUser[3]) + "," 
                 + wrapQuotations(curUser[4]);
             writeLine(userWriter, userRow);
-            if(!curUser[1].equals(curUser[2]) && !curUser[1].equals("") && !curUser[2].equals(""))
-                System.out.println(curUser[0]);
+            //if(curUser[1] != null && curUser[2] != null && !curUser[1].equals(curUser[2]))
+            //    System.out.println(curUser[0]);
         }
         System.out.println("----end different ratings----");
         
@@ -407,7 +411,7 @@ class MyParser {
 
     //wraps quotations around the String text
     static String wrapQuotations(String text) {
-        return "\"" + text + "\"";
+        return "\t" + text + "\t";
     }
 
     //gets the attribute text from a given Element e
@@ -429,7 +433,7 @@ class MyParser {
         }
     }
 
-    //creates/opens the csv file of name fileName
+    //creates/opens the dat file of name fileName
     static FileWriter createCSVFile(String fileName) {
         FileWriter temp = null;
         try {
