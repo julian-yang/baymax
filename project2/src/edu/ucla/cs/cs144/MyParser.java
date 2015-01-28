@@ -411,6 +411,8 @@ class MyParser {
 
     //wraps quotations around the String text
     static String wrapQuotations(String text) {
+        //use '\t' because that seems to be the character that doesn't appear in
+        //the text of descriptions...
         return "\t" + text + "\t";
     }
 
