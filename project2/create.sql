@@ -1,6 +1,6 @@
 CREATE TABLE Users
                 (   
-                    UserID INTEGER, 
+                    UserID VARCHAR(200), 
                     BuyerRating INTEGER, 
                     SellerRating Integer,
                     Location VARCHAR(200), 
@@ -21,8 +21,8 @@ CREATE TABLE Items
                     Location VARCHAR(200), 
                     Country VARCHAR(200), 
                     Description VARCHAR(4000), 
-                    SellerID INTEGER,
-                    PRIMARY KEY (ItemID), 
+                    SellerID VARCHAR(200),
+                    PRIMARY KEY (ItemID),
                     FOREIGN KEY (SellerID) REFERENCES Users(UserID)
                 );
 
@@ -36,7 +36,7 @@ CREATE TABLE ItemCategories
 
 CREATE TABLE Bids
                 (
-                    BidderID Integer,
+                    BidderID VARCHAR(200),
                     ItemID Integer,
                     Time TIMESTAMP,
                     Amount DECIMAL(8,2),
