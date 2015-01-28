@@ -6,7 +6,7 @@ CREATE TABLE Users
                     Location VARCHAR(200), 
                     Country VARCHAR(200),
                     PRIMARY KEY (UserID)
-                );
+                ) COLLATE latin1_general_cs; 
 
 CREATE TABLE Items 
                 (   
@@ -24,7 +24,7 @@ CREATE TABLE Items
                     SellerID VARCHAR(200),
                     PRIMARY KEY (ItemID),
                     FOREIGN KEY (SellerID) REFERENCES Users(UserID)
-                );
+                ) COLLATE latin1_general_cs; 
 
 CREATE TABLE ItemCategories
                 (
@@ -32,7 +32,7 @@ CREATE TABLE ItemCategories
                     Category VARCHAR(200),
                     PRIMARY KEY (ItemID, Category),
                     FOREIGN KEY (ITEMID) REFERENCES Items(ItemID)
-                );
+                ) COLLATE latin1_general_cs; 
 
 CREATE TABLE Bids
                 (
@@ -43,4 +43,5 @@ CREATE TABLE Bids
                     PRIMARY KEY (BidderID, ItemID, Time),
                     FOREIGN KEY (BidderID) REFERENCES Users(UserID),
                     FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
-                );
+                ) COLLATE latin1_general_cs; 
+

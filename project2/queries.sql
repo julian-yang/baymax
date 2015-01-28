@@ -1,6 +1,8 @@
 SELECT COUNT(*) FROM Users;
 
-SELECT COUNT(*) FROM Items WHERE Location="New York";
+SELECT COUNT(Distinct Items.ItemID)  
+FROM Items Natural Join Users 
+WHERE Users.Location = "New York";
 
 SELECT COUNT(*) 
     FROM (
@@ -23,5 +25,20 @@ SELECT B.ItemID
 
     -- How to write this without having to join twice???
 
+SELECT COUNT(*) 
+FROM Users
+WHERE SellerRating > 1000;
 
+SELECT COUNT(*)
+FROM Users
+WHERE   SellerRating IS NOT NULL 
+    AND BuyerRating IS NOT NULL;
+
+SELECT COUNT(*)
+FROM (
+        SELECT Category, Amount, ItemID
+        FROM Items NATURAL JOIN Bids Natural JOIN ItemCategories
+        WHERE Amount > 100
+        GROUP BY Category
+    ) A;
 
