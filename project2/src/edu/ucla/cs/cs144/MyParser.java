@@ -45,7 +45,7 @@ class MyParser {
     
     static final String columnSeparator = "|*|";
     static DocumentBuilder builder;
-    
+    static Vector<String> bothSellerAndBuyer;
     static final String[] typeName = {
 	"none",
 	"Element",
@@ -62,7 +62,7 @@ class MyParser {
 	"Notation",
     };
     
-    static Hashtable<String, Boolean> userList;
+    static Hashtable<String, String []> userList;
     static FileWriter itemWriter;
     static FileWriter itemCategoriesWriter;
     static FileWriter userWriter;
@@ -194,7 +194,6 @@ class MyParser {
         System.out.println("creating csv file");
         itemWriter = createCSVFile("Items.csv");
         itemCategoriesWriter = createCSVFile("ItemCategories.csv");
-        userWriter = createCSVFile("Users.csv");
         bidWriter = createCSVFile("Bids.csv");
         
         Element itemsElem = doc.getDocumentElement();
@@ -205,6 +204,7 @@ class MyParser {
             processItem(curItem);
         }
 
+        
         //close the csv files
         try {
             itemWriter.flush();
@@ -212,9 +212,6 @@ class MyParser {
 
             itemCategoriesWriter.flush();
             itemCategoriesWriter.close();
-            
-            userWriter.flush();
-            userWriter.close();
             
             bidWriter.flush();
             bidWriter.close();
@@ -268,26 +265,42 @@ class MyParser {
         itemRow += wrapQuotations(description) + ", ";
 
         Element sellerElem = getElementByTagNameNR(curItem, "Seller");
-        String seller = getAttributeText(sellerElem, "UserID");
-        itemRow += wrapQuotations(seller);
+        String sellerID = getAttributeText(sellerElem, "UserID");
+        itemRow += wrapQuotations(sellerID);
 
         String sellerRating = getAttributeText(sellerElem, "Rating");
-        String sellerRow = wrapQuotations(seller) + ", " + wrapQuotations(sellerRating);
         
-        System.out.println("itemid: " + itemID);
-        System.out.println("name: " + name);
-        System.out.println("buy_Price: " + buyPrice);
-        System.out.println("started: " + started);
-        System.out.println("ends: " + ends);
-        System.out.println("location: " + location);
-        System.out.println("latitude: " + latitude);
-        System.out.println("longitude: " + longitude);
-        System.out.println("country: " + country);
-        System.out.println("description: " + description);
-        System.out.println("seller ID: " + seller);
-        System.out.println("SQL line: " + itemRow);
+        //check if this seller already exists in our hashtable
+        String sellerRow [] = userList.get(sellerID);
+        if(sellerRow == null) {
+            sellerRow = new String[5];
+            sellerRow[0] = sellerID;
+            sellerRow[1] = "";
+            sellerRow[2] = sellerRating;
+            sellerRow[3] = "";
+            sellerRow[4] = "";
+            userList.put(sellerID, sellerRow);
+        } else {
+            sellerRow[2] = sellerRating;
+            if(!sellerRow[1].equals(""))
+                bothSellerAndBuyer.add(sellerID);
+        }
+        //String sellerRow = wrapQuotations(seller) + ", " + wrapQuotations(sellerRating);
+        
+        //System.out.println("itemid: " + itemID);
+        //System.out.println("name: " + name);
+        //System.out.println("buy_Price: " + buyPrice);
+        //System.out.println("started: " + started);
+        //System.out.println("ends: " + ends);
+        //System.out.println("location: " + location);
+        //System.out.println("latitude: " + latitude);
+        //System.out.println("longitude: " + longitude);
+        //System.out.println("country: " + country);
+        //System.out.println("description: " + description);
+        //System.out.println("seller ID: " + seller);
+        //System.out.println("SQL line: " + itemRow);
 
-        System.out.println("seller rating: " + sellerRating);
+        //System.out.println("seller rating: " + sellerRating);
         
         //for each itemCategory
         Element [] categories = getElementsByTagNameNR(curItem, "Category");
@@ -305,19 +318,29 @@ class MyParser {
             //process the user (bidder) first
             Element bidderElem = getElementByTagNameNR(bid, "Bidder");
             String bidderID = getAttributeText(bidderElem, "UserID");
-            System.out.println("got bidderID");
             String bidderRating = getAttributeText(bidderElem, "Rating");
             String bidderLocation = 
                 getElementTextByTagNameNR(bidderElem, "Location");
             String bidderCountry = 
                 getElementTextByTagNameNR(bidderElem, "Country");
 
-            String bidderRow = wrapQuotations(bidderID) + ", " 
-                + wrapQuotations(bidderRating) + ", " 
-                + wrapQuotations(bidderLocation) + ", " 
-                + wrapQuotations(bidderCountry);
-
-            writeLine(userWriter, bidderRow);
+            
+            String bidderRow [] = userList.get(bidderID);
+            if(bidderRow == null) {
+                bidderRow = new String[5];
+                bidderRow[0] = bidderID;
+                bidderRow[1] = bidderRating;
+                bidderRow[2] = "";
+                bidderRow[3] = bidderLocation;
+                bidderRow[4] = bidderCountry;
+                userList.put(bidderID, bidderRow);
+            } else {
+                bidderRow[1] = bidderRating;
+                bidderRow[3] = bidderLocation;
+                bidderRow[4] = bidderCountry;
+                if(!bidderRow[2].equals(""))
+                    bothSellerAndBuyer.add(bidderID);
+            }
             
             String bidTime = 
                 convertToSQLTime(getElementTextByTagNameNR(bid, "Time"));
@@ -330,10 +353,42 @@ class MyParser {
         }
 
         writeLine(itemWriter, itemRow);
-        writeLine(userWriter, sellerRow);
-        System.out.println("--------END ITEM PROCESS---------");
+        //System.out.println("--------END ITEM PROCESS---------");
     }
     
+    static void writeUsersToFile() {
+        userWriter = createCSVFile("Users.csv");
+        //write the list of users to file
+        System.out.println("Users that are both seller and buyer BUT different ratings: ");
+        Enumeration<String> keys = userList.keys();
+        while(keys.hasMoreElements()) {
+            String curUserID = keys.nextElement();
+            String curUser [] = userList.get(curUserID);
+            String userRow = wrapQuotations(curUser[0]) + ", " 
+                + wrapQuotations(curUser[1]) + ", " + wrapQuotations(curUser[2])
+                + ", " + wrapQuotations(curUser[3]) + ", " 
+                + wrapQuotations(curUser[4]);
+            writeLine(userWriter, userRow);
+            if(!curUser[1].equals(curUser[2]) && !curUser[1].equals("") && !curUser[2].equals(""))
+                System.out.println(curUser[0]);
+        }
+        System.out.println("----end different ratings----");
+        
+        //System.out.println("The users that are both seller and buyer: ");
+        //Enumeration<String> both = bothSellerAndBuyer.elements();
+        //while(both.hasMoreElements()) {
+        //    System.out.println(both.nextElement());
+        //}
+        //System.out.println("----end both----");
+
+        try {
+            userWriter.flush();
+            userWriter.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     //converts the XML date format to the SQL TIMESTAMP format
     //"Dec-03-01 18:38:23" => "0000-00-00 00:00:00"
     static String convertToSQLTime(String xmlTime) {
@@ -399,7 +454,8 @@ class MyParser {
             factory.setIgnoringElementContentWhitespace(true);      
             builder = factory.newDocumentBuilder();
             builder.setErrorHandler(new MyErrorHandler());
-            userList = new Hashtable<String, Boolean>();
+            userList = new Hashtable<String, String []>();
+            bothSellerAndBuyer = new Vector<String>();
         }
         catch (FactoryConfigurationError e) {
             System.out.println("unable to get a document builder factory");
@@ -415,5 +471,6 @@ class MyParser {
             File currentFile = new File(args[i]);
             processFile(currentFile);
         }
+        writeUsersToFile();
     }
 }

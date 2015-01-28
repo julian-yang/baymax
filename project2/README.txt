@@ -11,8 +11,8 @@ Part B:
         -Longitude?
         -Location
         -Country
-        -Seller [UserID]
         -Description
+        -Seller [UserID]
         
     ItemCategory
         *ItemID
@@ -20,7 +20,8 @@ Part B:
 
     Users
         *UserID
-        -Rating
+        -BuyerRating
+        -SellerRating
         -Location
         -Country
         
