@@ -1,8 +1,8 @@
 SELECT COUNT(*) FROM Users;
 
 SELECT COUNT(Distinct Items.ItemID)  
-FROM Items Natural Join Users 
-WHERE Users.Location = "New York";
+FROM Items  
+WHERE Location = "New York";
 
 SELECT COUNT(*) 
     FROM (
