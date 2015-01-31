@@ -1,6 +1,6 @@
 SELECT COUNT(*) FROM Users;
 
-SELECT COUNT(Distinct Items.ItemID)  
+SELECT COUNT(*)  
 FROM Items  
 WHERE Location = "New York";
 
