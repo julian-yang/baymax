@@ -1,3 +1,8 @@
+CS144 Project 2
+Group: Baymax
+Nathan Tung (004-059-195)
+Julian Yang (904-121-089)
+
 Part B:
 1) Relations
     Items
