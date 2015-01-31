@@ -3,11 +3,11 @@
 # Run the drop.sql batch file to drop existing tables
 # Inside the drop.sql, you sould check whether the table exists. Drop them ONLY if they exists.
 echo Dropping prexisting tables...
-mysql CS144 < drop.sql
+mysql -u cs144 CS144 < drop.sql
 echo ...Done
 # Run the create.sql batch file to create the database and tables
 echo Creating new tables...
-mysql CS144 < create.sql
+mysql -u cs144 CS144 < create.sql
 echo ...Done
 # Compile and run the parser to generate the appropriate load files
 echo Compiling and running parser...
@@ -17,7 +17,7 @@ echo ...Done
 
 # Run the load.sql batch file to load the data
 echo Loading data into MySQL...
-mysql CS144 < load.sql
+mysql -u cs144 CS144 < load.sql
 echo ...Done
 
 # Remove all temporary files
