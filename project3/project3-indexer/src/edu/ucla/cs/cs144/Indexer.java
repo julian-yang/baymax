@@ -75,12 +75,12 @@ public class Indexer {
  
     public void rebuildIndexes() {
 
-	// initialize connection variable
-    Connection conn = null;
+		// initialize connection variable
+		Connection conn = null;
 
-    // create a connection to the database to retrieve Items from MySQL
-	try {
-	    conn = DbManager.getConnection(true);
+		// create a connection to the database to retrieve Items from MySQL
+		try {
+			conn = DbManager.getConnection(true);
 		} catch (SQLException ex) {
 			System.out.println(ex);
 		}
@@ -117,28 +117,18 @@ public class Indexer {
 					categories += categoryRS.getString("Category") + " ";
 				}
 				
-				// close categoryRS
-				try {
-					categoryRS.close();
-				} catch (SQLException ex) {
-					System.out.println(ex);
-				}
-				
 				// index the item
 				indexItem(itemId, name, description, categories);
+				
+				// close categoryRS
+				categoryRS.close();
 			}
 			
 			// close index writer, itemRS, statement, and database connection
-			try {
-				closeIndexWriter();
-				itemRS.close();
-				s.close();
-				conn.close();
-			} catch (SQLException ex) {
-				System.out.println(ex);
-			} catch (IOException ex) {
-				System.out.println(ex);
-			}
+			closeIndexWriter();
+			itemRS.close();
+			s.close();
+			conn.close();
 			
 		} catch (SQLException ex) {
 			System.out.println(ex);
