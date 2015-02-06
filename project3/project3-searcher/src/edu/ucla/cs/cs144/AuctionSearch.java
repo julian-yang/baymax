@@ -50,12 +50,64 @@ public class AuctionSearch implements IAuctionSearch {
          *
          */
 	
+	private IndexSearcher searcher = null;
+    private QueryParser parser = null;
+	
+    public AuctionSearch() {
+		try {
+			searcher = new IndexSearcher(DirectoryReader.open(FSDirectory.open(new File("/var/lib/lucene/index1"))));
+			parser = new QueryParser("content", new StandardAnalyzer());
+		} catch (IOException ex) {
+			System.out.println(ex);
+		}
+    }
+	
 	public SearchResult[] basicSearch(String query, int numResultsToSkip, 
 			int numResultsToReturn) {
-		// TODO: Your code here!
+		
+		try {
+			// parse the query
+			Query queryObj = parser.parse(query);
+			
+			// obtain document results from query using index searcher; find all documents up to the last requested one
+			TopDocs results = searcher.search(queryObj, numResultsToSkip + numResultsToReturn);
+			
+			// use TopDocs to find total hits found and the array of ScoreDoc objects
+			int totalHits = results.totalHits;
+			ScoreDoc[] docs = results.scoreDocs;
+			
+			// if results to return tries to reach beyond total hits available, set a cap
+			// numResultsToReturn should be either the remaining available documents above numResultsToSkip
+			// or in the case where numResultsToSkip exceeds totalHits, it should return nothing
+			if(totalHits < (numResultsToSkip + numResultsToReturn))
+				numResultsToReturn = Math.max(0, totalHits - numResultsToSkip);
+			
+			// initialize SearchResult array to have expected number of results
+			SearchResult[] searchResults = new SearchResult[numResultsToReturn];
+			
+			// populate the array with corresponding SearchResult objects
+			for(int i=0; i<searchResults.length; i++) {
+				Document temp = getDocument(docs[numResultsToSkip + i].doc);
+				searchResults[i] = new SearchResult(temp.get("ItemID"), temp.get("Name"));
+			}
+			
+			// return results
+			return searchResults;
+			
+		} catch (ParseException ex) {
+			System.out.println(ex);
+		} catch (IOException ex) {
+			System.out.println(ex);
+		}
+		
+		// otherwise, return no results
 		return new SearchResult[0];
 	}
-
+	
+	public Document getDocument(int docId) throws IOException {
+        return searcher.doc(docId);
+    }
+	
 	public SearchResult[] spatialSearch(String query, SearchRegion region,
 			int numResultsToSkip, int numResultsToReturn) {
 		// TODO: Your code here!
