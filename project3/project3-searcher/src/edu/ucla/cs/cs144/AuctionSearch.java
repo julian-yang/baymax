@@ -189,16 +189,130 @@ public class AuctionSearch implements IAuctionSearch {
 	}
 
 	public String getXMLDataForItemId(String itemId) {
-		// TODO: Your code here!
+		
+		/*
+		// SAMPLE MEDIOCRE XML REFERENCE:
+		
+		<Item ItemID="1043374545">
+			<Name>christopher radko | fritz n_ frosty sledding</Name>
+			<Category>Collectibles</Category>
+			<Category>Decorative &amp; Holiday</Category>
+			<Category>Decorative by Brand</Category>
+			<Category>Christopher Radko</Category>
+			<Currently>$30.00</Currently>
+			<First_Bid>$30.00</First_Bid>
+			<Number_of_Bids>0</Number_of_Bids>
+			<Bids />
+			<Location>its a dry heat</Location>
+			<Country>USA</Country>
+			<Started>Dec-03-01 18:10:40</Started>
+			<Ends>Dec-13-01 18:10:40</Ends>
+			<Seller Rating="1035" UserID="rulabula" />
+			<Description>brand new beautiful handmade european blown glass ornament from christopher radko. this particular ornament features a snowman paired with a little girl bundled up in here pale blue coat sledding along on a silver and blue sled filled with packages. the ornament is approximately 5_ tall and 4_ wide. brand new and never displayed, it is in its clear plastic packaging and comes in the signature black radko gift box. PLEASE READ CAREFULLY!!!! payment by cashier's check, money order, or personal check. personal checks must clear before shipping. the hold period will be a minimum of 14 days. I ship with UPS and the buyer is responsible for shipping charges. the shipping rate is dependent on both the weight of the package and the distance that package will travel. the minimum shipping/handling charge is $6 and will increase with distance and weight. shipment will occur within 2 to 5 days after the deposit of funds. a $2 surcharge will apply for all USPS shipments if you cannot have or do not want ups service. If you are in need of rush shipping, please let me know and I_will furnish quotes on availability. the BUY-IT-NOW price includes free domestic shipping (international winners and residents of alaska and hawaii receive a credit of like value applied towards their total) and, as an added convenience, you can pay with paypal if you utilize the feature. paypal is not accepted if you win the auction during the course of the regular bidding-I only accept paypal if the buy it now feature is utilized. thank you for your understanding and good luck! Free Honesty Counters powered by Andale! Payment Details See item description and Payment Instructions, or contact seller for more information. Payment Instructions See item description or contact seller for more information.</Description>
+		</Item>
+		*/
+		
+		// establish a connection with database
+		Connection conn = null;
+		
+		try {
+			// start database connection
+			conn = DbManager.getConnection(true);
+
+			// statement for querying, such as grabbing an item's details using ItemID
+			Statement s = conn.createStatement();
+			ResultSet itemRS = s.executeQuery("SELECT * FROM Items WHERE ItemID = " + itemId);
+		
+			
+			// if such an item exists, get its information
+			if(itemRS.next()) {
+				String name = itemRS.getString("Name");
+				String buyPrice = itemRS.getString("BuyPrice");
+				String firstBid = itemRS.getString("FirstBid");
+				String started = itemRS.getString("Started");
+				String ends = itemRS.getString("Ends");
+				String latitude = itemRS.getString("Latitude");
+				String longitude = itemRS.getString("Longitude");
+				String location = itemRS.getString("Location");
+				String country = itemRS.getString("COuntry");
+				String description = itemRS.getString("Description");
+				String sellerId = itemRS.getString("SellerID");
+
+				started = formatDate(started);
+				ends = formatDate(ends);
+				
+				/*
+				ResultSet bidRS = s.executeQuery("SELECT * FROM Bids WHERE ItemID = " + itemId);
+				ResultSet categoryRS = s.executeQuery("SELECT * FROM ItemCategories WHERE ItemID = " + itemId);
+				ResultSet userRS = s.executeQuery("SELECT * FROM Users WHERE UserID = " + 000000000000000000000);
+				*/
+				
+				/*
+				System.out.println(name);
+				System.out.println(buyPrice);
+				System.out.println(firstBid);
+				System.out.println(started);
+				System.out.println(ends);
+				System.out.println(latitude);
+				System.out.println(longitude);
+				System.out.println(location);
+				System.out.println(country);
+				System.out.println(description);
+				System.out.println(sellerId);
+				*/
+			}
+			else {
+				// no such ItemID found, so return empty string
+				return "";
+			}
+
+			// close result sets, statements and database connection
+			itemRS.close();
+			s.close();
+			conn.close();
+			
+		} catch (SQLException ex) {
+			System.out.println(ex);
+		}
+		
+		// if any errors, return empty string
 		return "";
 	}
-		
+	
+	// given document ID, return corresponding document from IndexSearcher
 	public Document getDocument(int docId) throws IOException {
         return searcher.doc(docId);
     }
 	
+	// given lx, ly, rx, ry (bottom-left coordinates and top-right coordinates, respectively), generate a MySQL polygon region
 	public String getPolygon(double lx, double ly, double rx, double ry) {
 		return "GeomFromText('Polygon((" + lx + " " + ly + ", " + lx + " " + ry + ", " + rx + " " + ry + ", " + rx + " " + ly + ", " + lx + " " + ly +  "))')";
+	}
+	
+	// given a MySQL Timestamp as a string, reformat it into original XML date format
+	public String formatDate(String dateString) {
+		
+		// set up date formats
+		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+		SimpleDateFormat outputFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");	
+		
+		// parse the date string if possible; leave it unchanged otherwise
+		try {
+			// parse in string using input format to create a Date object
+			Date date = inputFormat.parse(dateString);
+			
+			// output Date object using output format and store as string
+			dateString = outputFormat.format(date);
+		} catch(Exception ex) {
+			System.out.println(ex);
+		}
+		
+		return dateString;
+	}
+	
+	// replace all occurrences of '&', '"', ''', '<', and '>' with their &_; counterparts
+	public String escapeString(String input) {
+		return input.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 	}
 	
 	public String echo(String message) {
