@@ -10,6 +10,7 @@ import java.util.List;
 import java.text.SimpleDateFormat;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -104,19 +105,100 @@ public class AuctionSearch implements IAuctionSearch {
 		return new SearchResult[0];
 	}
 	
-	public Document getDocument(int docId) throws IOException {
-        return searcher.doc(docId);
-    }
-	
 	public SearchResult[] spatialSearch(String query, SearchRegion region,
 			int numResultsToSkip, int numResultsToReturn) {
-		// TODO: Your code here!
-		return new SearchResult[0];
+		
+		//SELECT ItemID, MBRContains(GeomFromText('Polygon((33.774 -118.63, 33.774 -117.38, 34.201 -117.38, 34.201 -118.63, 33.774 -118.63))'), Position) AS isContained FROM Locations WHERE ItemID IN (SELECT ItemID FROM Items WHERE Description LIKE '%camera%' AND ItemID<1496912345);
+
+		int index = 0; // tracks search result returned from first running basic search
+		int skipped = 0; // tracks number of basic search results in region that were skipped
+		int added = 0; // tracks number of basic search results in region that were added to array list
+		
+		ArrayList<SearchResult> resultsList = new ArrayList<SearchResult>();
+		
+		// keep fetching results that satisfy the basic query search
+		SearchResult[] temp = basicSearch(query, index, numResultsToReturn);
+
+		// establish a connection with database
+		Connection conn = null;
+		
+		try {
+			// start database connection
+			conn = DbManager.getConnection(true);
+			
+			// create the string for a MySQL geometric polygon for parameter region
+			String polygon = getPolygon(region.getLx(), region.getLy(), region.getRx(), region.getRy());
+			
+			// prepared statement to test a specific item (by ItemID) for spatial containment in polygon region
+			PreparedStatement checkContains = conn.prepareStatement("SELECT MBRContains(" + polygon + ",Position) AS isContained FROM Locations WHERE ItemID = ?");
+			
+			// as long as we haven't added the numResultsToReturn and basic search still returns results
+			while(added < numResultsToReturn && temp.length > 0) {
+
+				//System.out.println("index/temp.length/added/skipped: " + index + "/" + temp.length + "/" + added + "/" + skipped);
+				
+				for(int i=0; i<temp.length; i++) {
+					
+					// get SearchResult's ItemId, plug it into prepared statement, and check if the item is spatially found in region
+					String itemId = temp[i].getItemId();
+					checkContains.setString(1, itemId);
+					ResultSet containsRS = checkContains.executeQuery();
+										
+					// if specific item is found in Locations table and is contained in region
+					if(containsRS.next() && containsRS.getBoolean("isContained")) {
+						if(added >= numResultsToReturn) {
+							// enough results have been added to array list, so break out of loop
+							break;
+						}
+						if(skipped >= numResultsToSkip) {
+							// we've skipped enough results, so add SearchResult to array list
+							added++;
+							resultsList.add(temp[i]);
+						}
+						else {
+							// skip and don't add to array list, but increment the skipped count
+							skipped++;
+						}
+					}
+					
+					// close containsRS
+					containsRS.close();
+				}
+				
+				// lookup the next numResultsToReturn amount of basic search results to continue comparing
+				index += numResultsToReturn;
+				temp = basicSearch(query, index, numResultsToReturn);
+			}
+			
+			// close statements and database connection
+			checkContains.close();
+			conn.close();
+			
+		} catch (SQLException ex) {
+			System.out.println(ex);
+		}
+		
+		// move results from dynamic array list over to array
+		// SearchResult[] searchResults = resultsList.toArray(new SearchResult[added]);
+		SearchResult[] searchResults = new SearchResult[added];
+		for(int i=0; i<added; i++) {
+			searchResults[i] = resultsList.get(i);
+		}
+		
+		return searchResults;
 	}
 
 	public String getXMLDataForItemId(String itemId) {
 		// TODO: Your code here!
 		return "";
+	}
+		
+	public Document getDocument(int docId) throws IOException {
+        return searcher.doc(docId);
+    }
+	
+	public String getPolygon(double lx, double ly, double rx, double ry) {
+		return "GeomFromText('Polygon((" + lx + " " + ly + ", " + lx + " " + ry + ", " + rx + " " + ry + ", " + rx + " " + ly + ", " + lx + " " + ly +  "))')";
 	}
 	
 	public String echo(String message) {
