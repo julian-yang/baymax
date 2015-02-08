@@ -413,7 +413,11 @@ class MyParser {
     static String wrapQuotations(String text) {
         //use '\t' because that seems to be the character that doesn't appear in
         //the text of descriptions...
-        return "\t" + text + "\t";
+        if(text != null) {
+            return "\t" + text + "\t";
+        }
+        else
+            return "\tNULL\t";
     }
 
     //gets the attribute text from a given Element e
