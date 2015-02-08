@@ -108,9 +108,10 @@ public class AuctionSearch implements IAuctionSearch {
 	public SearchResult[] spatialSearch(String query, SearchRegion region,
 			int numResultsToSkip, int numResultsToReturn) {
 		
-		//SELECT ItemID, MBRContains(GeomFromText('Polygon((33.774 -118.63, 33.774 -117.38, 34.201 -117.38, 34.201 -118.63, 33.774 -118.63))'), Position) AS isContained FROM Locations WHERE ItemID IN (SELECT ItemID FROM Items WHERE Description LIKE '%camera%' AND ItemID<1496912345);
+		// Sample Query:
+		// SELECT ItemID, MBRContains(GeomFromText('Polygon((33.774 -118.63, 33.774 -117.38, 34.201 -117.38, 34.201 -118.63, 33.774 -118.63))'), Position) AS isContained FROM Locations WHERE ItemID IN (SELECT ItemID FROM Items WHERE Description LIKE '%camera%' AND ItemID<1496912345);
 
-		int index = 0; // tracks search result returned from first running basic search
+		int index = 0; // tracks search results returned from first running basic search
 		int skipped = 0; // tracks number of basic search results in region that were skipped
 		int added = 0; // tracks number of basic search results in region that were added to array list
 		
@@ -204,6 +205,7 @@ public class AuctionSearch implements IAuctionSearch {
 			// if such an item exists, get its information
 			if(itemRS.next()) {
 				
+				// get all basic information from Items table
 				String name = escapeString(itemRS.getString("Name"));
 				String buyPrice = escapeString(itemRS.getString("BuyPrice"));
 				String firstBid = escapeString(itemRS.getString("FirstBid"));
@@ -216,15 +218,18 @@ public class AuctionSearch implements IAuctionSearch {
 				String description = escapeString(itemRS.getString("Description"));
 				String sellerId = escapeString(itemRS.getString("SellerID"));
 
-				String sellerRating = "";
+				// initialize current bid price to first bid
 				String currently = escapeString(firstBid);
 				
+				// initialize seller's rating, then do a query on Users to get the actual value based on sellerId
+				String sellerRating = "";
 				ResultSet sellerRS = s.executeQuery("SELECT * FROM Users WHERE UserID = '" + sellerId + "'");
 				if(sellerRS.next()) {
 					sellerRating = escapeString(sellerRS.getString("sellerRating"));
 				}
 				sellerRS.close();
 				
+				// add all associated categories to array list
 				ArrayList<String> categories = new ArrayList<String>();
 				ResultSet categoryRS = s.executeQuery("SELECT * FROM ItemCategories WHERE ItemID = " + itemId);
 				while(categoryRS.next()) {
@@ -232,6 +237,7 @@ public class AuctionSearch implements IAuctionSearch {
 				}
 				categoryRS.close();
 
+				// add all bids on item to array list, ordered from earliest to latest
 				ArrayList<String> bids = new ArrayList<String>();
 				ResultSet bidRS = s.executeQuery("SELECT * FROM Bids WHERE ItemID = " + itemId + " ORDER BY Time ASC");
 				while(bidRS.next()) {
@@ -239,6 +245,8 @@ public class AuctionSearch implements IAuctionSearch {
 					String time = escapeString(formatDate(bidRS.getString("Time")));
 					String amount = escapeString(bidRS.getString("Amount"));
 					
+					// get bidder information from Users table using their user id
+					// pre-wrap each "bid" in tags, encompassed by <Bid>...</Bid>
 					ResultSet userRS = s.executeQuery("SELECT * FROM Users WHERE UserID = " + bidderId);
 					if(userRS.next()) {
 						String bidderRating = escapeString(userRS.getString("BuyerRating"));
@@ -247,11 +255,13 @@ public class AuctionSearch implements IAuctionSearch {
 						
 						String bid = "<Bid>";
 						
+						// add bidder information
 						bid += "<Bidder Rating=\"" + bidderRating + "\" UserID=\"" + bidderId + "\">\n";
 						bid += "<Location>" + bidderLocation + "</Location>\n";						
 						bid += "<Country>" + bidderCountry + "</Country>\n";
 						bid += "</Bidder>\n";
 						
+						// add the rest of the bid information
 						bid += "<Time>" + time + "</Time>\n";
 						bid += "<Amount>" + amount + "</Amount>\n";
 						
@@ -259,7 +269,7 @@ public class AuctionSearch implements IAuctionSearch {
 						
 						bids.add(bid);
 
-						// update current price
+						// update current price to latest bid amount (since the last bid is the largest in value)
 						currently = amount;
 					}
 					
@@ -274,6 +284,7 @@ public class AuctionSearch implements IAuctionSearch {
 				s.close();
 				conn.close();
 
+				// pass all escaped values into buildXML and return the string result
 				return buildXML(itemId, name, categories, buyPrice, currently, firstBid, bids, latitude, longitude, location, country, started, ends, sellerRating, sellerId, description);
 			}
 			else {
@@ -307,6 +318,7 @@ public class AuctionSearch implements IAuctionSearch {
 	// given a MySQL Timestamp as a string, reformat it into original XML date format
 	public String formatDate(String dateString) {
 		
+		// if date is null, don't try to format it
 		if(dateString==null || dateString.isEmpty()) {
 			return dateString;
 		}
@@ -332,6 +344,7 @@ public class AuctionSearch implements IAuctionSearch {
 	// replace all occurrences of '&', '"', ''', '<', and '>' with their &_; counterparts
 	public String escapeString(String input) {
 		
+		// if input is null, don't try to escape it
 		if(input==null || input.isEmpty()) {
 			return input;
 		}
@@ -347,12 +360,14 @@ public class AuctionSearch implements IAuctionSearch {
 		
 		xml += "<Name>" + name + "</Name>\n";
 		
+		// create category tags for every single category
 		for(String category : categories) {
 			xml += "<Category>" + category + "</Category>\n";
 		}
 		
 		xml += "<Currently>" + currently + "</Currently>\n";
 
+		// if buy price is provided, add tags
 		if(buyPrice != null && !buyPrice.isEmpty()) {
 			xml += "<Buy_Price>" + buyPrice + "</Buy_Price>\n";
 		}
@@ -361,6 +376,7 @@ public class AuctionSearch implements IAuctionSearch {
 
 		xml += "<Number_of_Bids>" + bids.size() + "</Number_of_Bids>\n";
 
+		// if no bids, return empty bids tag; otherwise, add all pre-generated bid XML to <Bids>...</Bids>
 		if(bids.size()==0) {
 			xml += "<Bids />\n";
 		}
@@ -374,6 +390,7 @@ public class AuctionSearch implements IAuctionSearch {
 			xml += "</Bids>\n";
 		}
 		
+		// if latitude and longitude are provided, add them as attributes to the item's location
 		if(latitude != null && !latitude.isEmpty() && longitude != null && !longitude.isEmpty()) {
 			xml += "<Location Latitude=\"" + latitude + "\" Longitude=\"" + longitude + "\">" + location + "</Location>\n";
 		}
@@ -389,6 +406,7 @@ public class AuctionSearch implements IAuctionSearch {
 		
 		xml += "<Seller Rating=\"" + sellerRating + "\" UserID=\"" + sellerId + "\" />\n";
 		
+		// if description is provided, add them between tags; otherwise, return empty tag
 		if(description != null & !description.isEmpty()) {
 			xml += "<Description>" + description + "</Description>\n";
 		}
@@ -397,8 +415,6 @@ public class AuctionSearch implements IAuctionSearch {
 		}
 		
 		xml += "</Item>";
-		
-		System.out.println("\t" + null);
 		
 		return xml;
 	}
