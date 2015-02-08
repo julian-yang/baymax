@@ -6,6 +6,6 @@ CREATE TABLE Locations
 					FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
 				) ENGINE = MyISAM COLLATE latin1_general_cs;
 
-INSERT INTO Locations SELECT ItemID, GeomFromText(CONCAT('Point (', Latitude, ' ', Longitude, ')')) FROM Items WHERE Latitude<>'null' AND Longitude<>'null';
+INSERT INTO Locations SELECT ItemID, Point(Latitude, Longitude) FROM Items WHERE Latitude<>'null' AND Longitude<>'null';
 
 CREATE SPATIAL INDEX sp_index ON Locations (Position);
