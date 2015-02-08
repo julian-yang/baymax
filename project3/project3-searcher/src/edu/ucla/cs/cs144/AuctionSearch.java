@@ -199,8 +199,13 @@ public class AuctionSearch implements IAuctionSearch {
 			conn = DbManager.getConnection(true);
 
 			// statement for querying, such as grabbing an item's details using ItemID
-			Statement s = conn.createStatement();
-			ResultSet itemRS = s.executeQuery("SELECT * FROM Items WHERE ItemID = " + itemId);
+			Statement itemStatement = conn.createStatement();
+			Statement sellerStatement = conn.createStatement();
+			Statement categoryStatement = conn.createStatement();
+			Statement bidStatement = conn.createStatement();
+			Statement userStatement = conn.createStatement();
+			
+			ResultSet itemRS = itemStatement.executeQuery("SELECT * FROM Items WHERE ItemID = " + itemId);
 			
 			// if such an item exists, get its information
 			if(itemRS.next()) {
@@ -223,7 +228,7 @@ public class AuctionSearch implements IAuctionSearch {
 				
 				// initialize seller's rating, then do a query on Users to get the actual value based on sellerId
 				String sellerRating = "";
-				ResultSet sellerRS = s.executeQuery("SELECT * FROM Users WHERE UserID = '" + sellerId + "'");
+				ResultSet sellerRS = sellerStatement.executeQuery("SELECT * FROM Users WHERE UserID = '" + sellerId + "'");
 				if(sellerRS.next()) {
 					sellerRating = escapeString(sellerRS.getString("sellerRating"));
 				}
@@ -231,15 +236,16 @@ public class AuctionSearch implements IAuctionSearch {
 				
 				// add all associated categories to array list
 				ArrayList<String> categories = new ArrayList<String>();
-				ResultSet categoryRS = s.executeQuery("SELECT * FROM ItemCategories WHERE ItemID = " + itemId);
+				ResultSet categoryRS = categoryStatement.executeQuery("SELECT * FROM ItemCategories WHERE ItemID = " + itemId);
 				while(categoryRS.next()) {
 					categories.add(escapeString(categoryRS.getString("Category")));
 				}
 				categoryRS.close();
 
+				
 				// add all bids on item to array list, ordered from earliest to latest
 				ArrayList<String> bids = new ArrayList<String>();
-				ResultSet bidRS = s.executeQuery("SELECT * FROM Bids WHERE ItemID = " + itemId + " ORDER BY Time ASC");
+				ResultSet bidRS = bidStatement.executeQuery("SELECT * FROM Bids WHERE ItemID = " + itemId + " ORDER BY Time ASC");
 				while(bidRS.next()) {
 					String bidderId = escapeString(bidRS.getString("BidderID"));
 					String time = escapeString(formatDate(bidRS.getString("Time")));
@@ -247,7 +253,9 @@ public class AuctionSearch implements IAuctionSearch {
 					
 					// get bidder information from Users table using their user id
 					// pre-wrap each "bid" in tags, encompassed by <Bid>...</Bid>
-					ResultSet userRS = s.executeQuery("SELECT * FROM Users WHERE UserID = " + bidderId);
+					ResultSet userRS = userStatement.executeQuery("SELECT * FROM Users WHERE UserID = '" + bidderId + "'");
+
+					System.out.println("HMM4");
 					if(userRS.next()) {
 						String bidderRating = escapeString(userRS.getString("BuyerRating"));
 						String bidderLocation = escapeString(userRS.getString("Location"));
@@ -271,19 +279,27 @@ public class AuctionSearch implements IAuctionSearch {
 
 						// update current price to latest bid amount (since the last bid is the largest in value)
 						currently = amount;
+						
+						System.out.println("HMM");
 					}
-					
+					System.out.println("HMM2");
 					userRS.close();
-					
+					System.out.println("HMM3");
 				}
 				
 				bidRS.close();
 
 				// close result sets, statements and database connection
 				itemRS.close();
-				s.close();
+				
+				itemStatement.close();
+				sellerStatement.close();
+				categoryStatement.close();
+				bidStatement.close();
+				userStatement.close();
+				
 				conn.close();
-
+				
 				// pass all escaped values into buildXML and return the string result
 				return buildXML(itemId, name, categories, buyPrice, currently, firstBid, bids, latitude, longitude, location, country, started, ends, sellerRating, sellerId, description);
 			}
@@ -291,7 +307,7 @@ public class AuctionSearch implements IAuctionSearch {
 				
 				// close result sets, statements and database connection
 				itemRS.close();
-				s.close();
+				itemStatement.close();
 				conn.close();
 				
 				// no such ItemID found, so return empty string
