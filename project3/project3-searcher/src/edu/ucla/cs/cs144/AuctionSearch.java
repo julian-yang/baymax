@@ -260,7 +260,7 @@ public class AuctionSearch implements IAuctionSearch {
 						String bidderLocation = escapeString(userRS.getString("Location"));
 						String bidderCountry = escapeString(userRS.getString("Country"));
 						
-						String bid = "<Bid>";
+						String bid = "<Bid>\n";
 						
 						// add bidder information
 						bid += "<Bidder Rating=\"" + bidderRating + "\" UserID=\"" + bidderId + "\">\n";
@@ -270,9 +270,9 @@ public class AuctionSearch implements IAuctionSearch {
 						
 						// add the rest of the bid information
 						bid += "<Time>" + time + "</Time>\n";
-						bid += "<Amount>" + amount + "</Amount>\n";
+						bid += "<Amount>$" + amount + "</Amount>\n";
 						
-						bid += "</Bid>";
+						bid += "</Bid>\n";
 						
 						bids.add(bid);
 
@@ -377,14 +377,14 @@ public class AuctionSearch implements IAuctionSearch {
 			xml += "<Category>" + category + "</Category>\n";
 		}
 		
-		xml += "<Currently>" + currently + "</Currently>\n";
+		xml += "<Currently>$" + currently + "</Currently>\n";
 
 		// if buy price is provided, add tags
 		if(buyPrice != null && !buyPrice.isEmpty()) {
-			xml += "<Buy_Price>" + buyPrice + "</Buy_Price>\n";
+			xml += "<Buy_Price>$" + buyPrice + "</Buy_Price>\n";
 		}
 
-		xml += "<First_Bid>" + firstBid + "</First_Bid>\n";
+		xml += "<First_Bid>$" + firstBid + "</First_Bid>\n";
 
 		xml += "<Number_of_Bids>" + bids.size() + "</Number_of_Bids>\n";
 
