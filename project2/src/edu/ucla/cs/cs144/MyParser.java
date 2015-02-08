@@ -396,8 +396,8 @@ class MyParser {
     //converts the XML date format to the SQL TIMESTAMP format
     //"Dec-03-01 18:38:23" => "0000-00-00 00:00:00"
     static String convertToSQLTime(String xmlTime) {
-        SimpleDateFormat xmlFormat = new SimpleDateFormat("MMM-dd-yy hh:mm:ss");
-        SimpleDateFormat sqlFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat xmlFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");
+        SimpleDateFormat sqlFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date inputDate = null;
         try {
             inputDate = xmlFormat.parse(xmlTime);
