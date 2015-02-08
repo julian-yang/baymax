@@ -190,28 +190,6 @@ public class AuctionSearch implements IAuctionSearch {
 
 	public String getXMLDataForItemId(String itemId) {
 		
-		/*
-		// SAMPLE MEDIOCRE XML REFERENCE:
-		
-		<Item ItemID="1043374545">
-			<Name>christopher radko | fritz n_ frosty sledding</Name>
-			<Category>Collectibles</Category>
-			<Category>Decorative &amp; Holiday</Category>
-			<Category>Decorative by Brand</Category>
-			<Category>Christopher Radko</Category>
-			<Currently>$30.00</Currently>
-			<First_Bid>$30.00</First_Bid>
-			<Number_of_Bids>0</Number_of_Bids>
-			<Bids />
-			<Location>its a dry heat</Location>
-			<Country>USA</Country>
-			<Started>Dec-03-01 18:10:40</Started>
-			<Ends>Dec-13-01 18:10:40</Ends>
-			<Seller Rating="1035" UserID="rulabula" />
-			<Description>brand new beautiful handmade european blown glass ornament from christopher radko. this particular ornament features a snowman paired with a little girl bundled up in here pale blue coat sledding along on a silver and blue sled filled with packages. the ornament is approximately 5_ tall and 4_ wide. brand new and never displayed, it is in its clear plastic packaging and comes in the signature black radko gift box. PLEASE READ CAREFULLY!!!! payment by cashier's check, money order, or personal check. personal checks must clear before shipping. the hold period will be a minimum of 14 days. I ship with UPS and the buyer is responsible for shipping charges. the shipping rate is dependent on both the weight of the package and the distance that package will travel. the minimum shipping/handling charge is $6 and will increase with distance and weight. shipment will occur within 2 to 5 days after the deposit of funds. a $2 surcharge will apply for all USPS shipments if you cannot have or do not want ups service. If you are in need of rush shipping, please let me know and I_will furnish quotes on availability. the BUY-IT-NOW price includes free domestic shipping (international winners and residents of alaska and hawaii receive a credit of like value applied towards their total) and, as an added convenience, you can pay with paypal if you utilize the feature. paypal is not accepted if you win the auction during the course of the regular bidding-I only accept paypal if the buy it now feature is utilized. thank you for your understanding and good luck! Free Honesty Counters powered by Andale! Payment Details See item description and Payment Instructions, or contact seller for more information. Payment Instructions See item description or contact seller for more information.</Description>
-		</Item>
-		*/
-		
 		// establish a connection with database
 		Connection conn = null;
 		
@@ -222,55 +200,92 @@ public class AuctionSearch implements IAuctionSearch {
 			// statement for querying, such as grabbing an item's details using ItemID
 			Statement s = conn.createStatement();
 			ResultSet itemRS = s.executeQuery("SELECT * FROM Items WHERE ItemID = " + itemId);
-		
 			
 			// if such an item exists, get its information
 			if(itemRS.next()) {
-				String name = itemRS.getString("Name");
-				String buyPrice = itemRS.getString("BuyPrice");
-				String firstBid = itemRS.getString("FirstBid");
-				String started = itemRS.getString("Started");
-				String ends = itemRS.getString("Ends");
-				String latitude = itemRS.getString("Latitude");
-				String longitude = itemRS.getString("Longitude");
-				String location = itemRS.getString("Location");
-				String country = itemRS.getString("COuntry");
-				String description = itemRS.getString("Description");
-				String sellerId = itemRS.getString("SellerID");
+				
+				String name = escapeString(itemRS.getString("Name"));
+				String buyPrice = escapeString(itemRS.getString("BuyPrice"));
+				String firstBid = escapeString(itemRS.getString("FirstBid"));
+				String started = escapeString(formatDate(itemRS.getString("Started")));
+				String ends = escapeString(formatDate(itemRS.getString("Ends")));
+				String latitude = escapeString(itemRS.getString("Latitude"));
+				String longitude = escapeString(itemRS.getString("Longitude"));
+				String location = escapeString(itemRS.getString("Location"));
+				String country = escapeString(itemRS.getString("Country"));
+				String description = escapeString(itemRS.getString("Description"));
+				String sellerId = escapeString(itemRS.getString("SellerID"));
 
-				started = formatDate(started);
-				ends = formatDate(ends);
+				String sellerRating = "";
+				String currently = escapeString(firstBid);
 				
-				/*
-				ResultSet bidRS = s.executeQuery("SELECT * FROM Bids WHERE ItemID = " + itemId);
+				ResultSet sellerRS = s.executeQuery("SELECT * FROM Users WHERE UserID = '" + sellerId + "'");
+				if(sellerRS.next()) {
+					sellerRating = escapeString(sellerRS.getString("sellerRating"));
+				}
+				sellerRS.close();
+				
+				ArrayList<String> categories = new ArrayList<String>();
 				ResultSet categoryRS = s.executeQuery("SELECT * FROM ItemCategories WHERE ItemID = " + itemId);
-				ResultSet userRS = s.executeQuery("SELECT * FROM Users WHERE UserID = " + 000000000000000000000);
-				*/
+				while(categoryRS.next()) {
+					categories.add(escapeString(categoryRS.getString("Category")));
+				}
+				categoryRS.close();
+
+				ArrayList<String> bids = new ArrayList<String>();
+				ResultSet bidRS = s.executeQuery("SELECT * FROM Bids WHERE ItemID = " + itemId + " ORDER BY Time ASC");
+				while(bidRS.next()) {
+					String bidderId = escapeString(bidRS.getString("BidderID"));
+					String time = escapeString(formatDate(bidRS.getString("Time")));
+					String amount = escapeString(bidRS.getString("Amount"));
+					
+					ResultSet userRS = s.executeQuery("SELECT * FROM Users WHERE UserID = " + bidderId);
+					if(userRS.next()) {
+						String bidderRating = escapeString(userRS.getString("BuyerRating"));
+						String bidderLocation = escapeString(userRS.getString("Location"));
+						String bidderCountry = escapeString(userRS.getString("Country"));
+						
+						String bid = "<Bid>";
+						
+						bid += "<Bidder Rating=\"" + bidderRating + "\" UserID=\"" + bidderId + "\">\n";
+						bid += "<Location>" + bidderLocation + "</Location>\n";						
+						bid += "<Country>" + bidderCountry + "</Country>\n";
+						bid += "</Bidder>\n";
+						
+						bid += "<Time>" + time + "</Time>\n";
+						bid += "<Amount>" + amount + "</Amount>\n";
+						
+						bid += "</Bid>";
+						
+						bids.add(bid);
+
+						// update current price
+						currently = amount;
+					}
+					
+					userRS.close();
+					
+				}
 				
-				/*
-				System.out.println(name);
-				System.out.println(buyPrice);
-				System.out.println(firstBid);
-				System.out.println(started);
-				System.out.println(ends);
-				System.out.println(latitude);
-				System.out.println(longitude);
-				System.out.println(location);
-				System.out.println(country);
-				System.out.println(description);
-				System.out.println(sellerId);
-				*/
+				bidRS.close();
+
+				// close result sets, statements and database connection
+				itemRS.close();
+				s.close();
+				conn.close();
+
+				return buildXML(itemId, name, categories, buyPrice, currently, firstBid, bids, latitude, longitude, location, country, started, ends, sellerRating, sellerId, description);
 			}
 			else {
+				
+				// close result sets, statements and database connection
+				itemRS.close();
+				s.close();
+				conn.close();
+				
 				// no such ItemID found, so return empty string
 				return "";
 			}
-
-			// close result sets, statements and database connection
-			itemRS.close();
-			s.close();
-			conn.close();
-			
 		} catch (SQLException ex) {
 			System.out.println(ex);
 		}
@@ -292,8 +307,12 @@ public class AuctionSearch implements IAuctionSearch {
 	// given a MySQL Timestamp as a string, reformat it into original XML date format
 	public String formatDate(String dateString) {
 		
+		if(dateString==null || dateString.isEmpty()) {
+			return dateString;
+		}
+				
 		// set up date formats
-		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat outputFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");	
 		
 		// parse the date string if possible; leave it unchanged otherwise
@@ -312,7 +331,76 @@ public class AuctionSearch implements IAuctionSearch {
 	
 	// replace all occurrences of '&', '"', ''', '<', and '>' with their &_; counterparts
 	public String escapeString(String input) {
+		
+		if(input==null || input.isEmpty()) {
+			return input;
+		}
+		
 		return input.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+	}
+	
+	// reconstruct XML using only given parameters
+	public String buildXML(String itemId, String name, ArrayList<String> categories, String buyPrice, String currently, String firstBid, ArrayList<String> bids,
+		String latitude, String longitude, String location, String country, String started, String ends, String sellerRating, String sellerId, String description) {
+		
+		String xml = "<Item ItemID=\"" + itemId + "\">\n";
+		
+		xml += "<Name>" + name + "</Name>\n";
+		
+		for(String category : categories) {
+			xml += "<Category>" + category + "</Category>\n";
+		}
+		
+		xml += "<Currently>" + currently + "</Currently>\n";
+
+		if(buyPrice != null && !buyPrice.isEmpty()) {
+			xml += "<Buy_Price>" + buyPrice + "</Buy_Price>\n";
+		}
+
+		xml += "<First_Bid>" + firstBid + "</First_Bid>\n";
+
+		xml += "<Number_of_Bids>" + bids.size() + "</Number_of_Bids>\n";
+
+		if(bids.size()==0) {
+			xml += "<Bids />\n";
+		}
+		else {
+			xml += "<Bids>\n";
+			
+			for(String bid : bids) {
+				xml += bid;
+			}
+			
+			xml += "</Bids>\n";
+		}
+		
+		if(latitude != null && !latitude.isEmpty() && longitude != null && !longitude.isEmpty()) {
+			xml += "<Location Latitude=\"" + latitude + "\" Longitude=\"" + longitude + "\">" + location + "</Location>\n";
+		}
+		else {
+			xml += "<Location>" + location + "</Location>\n";
+		}
+
+		xml += "<Country>" + country + "</Country>\n";
+		
+		xml += "<Started>" + started + "</Started>\n";
+		
+		xml += "<Ends>" + ends + "</Ends>\n";
+		
+		xml += "<Seller Rating=\"" + sellerRating + "\" UserID=\"" + sellerId + "\" />\n";
+		
+		if(description != null & !description.isEmpty()) {
+			xml += "<Description>" + description + "</Description>\n";
+		}
+		else {
+			xml += "<Description />\n";
+		}
+		
+		xml += "</Item>";
+		
+		System.out.println("\t" + null);
+		
+		return xml;
 	}
 	
 	public String echo(String message) {
