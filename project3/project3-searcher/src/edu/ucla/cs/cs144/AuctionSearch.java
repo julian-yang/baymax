@@ -255,7 +255,6 @@ public class AuctionSearch implements IAuctionSearch {
 					// pre-wrap each "bid" in tags, encompassed by <Bid>...</Bid>
 					ResultSet userRS = userStatement.executeQuery("SELECT * FROM Users WHERE UserID = '" + bidderId + "'");
 
-					System.out.println("HMM4");
 					if(userRS.next()) {
 						String bidderRating = escapeString(userRS.getString("BuyerRating"));
 						String bidderLocation = escapeString(userRS.getString("Location"));
@@ -280,11 +279,8 @@ public class AuctionSearch implements IAuctionSearch {
 						// update current price to latest bid amount (since the last bid is the largest in value)
 						currently = amount;
 						
-						System.out.println("HMM");
 					}
-					System.out.println("HMM2");
 					userRS.close();
-					System.out.println("HMM3");
 				}
 				
 				bidRS.close();
