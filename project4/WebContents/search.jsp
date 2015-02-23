@@ -1,4 +1,4 @@
-<%@ taglib uri=http://java.sun.com/jstl/core prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <html>
     <head>
@@ -8,11 +8,11 @@
         <ol>
             <c:forEach var="result" items="${results}">
                 <li>
-                    <p>ItemID: <span>${result.getItemID}</span>
-                       Name: <span>${result.getName}</span>
+                    <p>ItemID: <span>${result.getItemId()}</span>
+                       Name: <span>${result.getName()}</span>
                     </p>
                 </li>
-            <c:forEach>
+            </c:forEach>
         </ol>
     </body>
 </html>
