@@ -1,0 +1,14 @@
+<html>
+    <head><title>Query Search!</title></head>
+    <body>
+        <h1>Query Search!</h1>
+
+        <form action="/eBay/search" method="GET">
+            <span>Enter search text:</span>
+            <input name="q" type="text">
+            <!-- TODO: set these hidden fields with Javascript or something -->
+            <input name="numResultsToSkip" type="hidden" value="0">
+            <input name="numResultsToReturn" type="hidden" value="10">
+            <input type="submit">
+        </form>
+</html>
