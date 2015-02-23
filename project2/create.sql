@@ -1,8 +1,8 @@
 CREATE TABLE Users
                 (   
                     UserID VARCHAR(200), 
-                    BuyerRating INTEGER, 
-                    SellerRating Integer,
+                    BuyerRating INTEGER DEFAULT NULL, 
+                    SellerRating INTEGER DEFAULT NULL,
                     Location VARCHAR(200), 
                     Country VARCHAR(200),
                     PRIMARY KEY (UserID)

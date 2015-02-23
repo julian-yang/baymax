@@ -279,10 +279,10 @@ class MyParser {
         if(sellerRow == null) {
             sellerRow = new String[5];
             sellerRow[0] = sellerID;
-            sellerRow[1] = null;
+            sellerRow[1] = "NULL";
             sellerRow[2] = sellerRating;
-            sellerRow[3] = null;
-            sellerRow[4] = null;
+            sellerRow[3] = "NULL";
+            sellerRow[4] = "NULL";
             userList.put(sellerID, sellerRow);
         } else {
             sellerRow[2] = sellerRating;
@@ -334,7 +334,7 @@ class MyParser {
                 bidderRow = new String[5];
                 bidderRow[0] = bidderID;
                 bidderRow[1] = bidderRating;
-                bidderRow[2] = null;
+                bidderRow[2] = "NULL";
                 bidderRow[3] = bidderLocation;
                 bidderRow[4] = bidderCountry;
                 userList.put(bidderID, bidderRow);
