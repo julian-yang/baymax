@@ -7,6 +7,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import java.io.StringReader;
+import java.io.IOException;
+
 public class ItemServlet extends HttpServlet implements Servlet {
        
     public ItemServlet() {}
@@ -16,10 +27,29 @@ public class ItemServlet extends HttpServlet implements Servlet {
 		String id = preventNullString(request.getParameter("id"));
 		
 		// get XML data of item
-		String itemXML = AuctionSearchClient.getXMLDataForItemId(id);
-		
-		request.setAttribute("result", itemXML);
-		
+		String itemXMLString = AuctionSearchClient.getXMLDataForItemId(id);
+    
+        ItemResult item = new ItemResult();
+        try {
+		    Element itemElem = loadXMLFromString(itemXMLString).getDocumentElement();
+            item = MyParser.extractItemInfo(itemElem);
+        }  catch (FactoryConfigurationError e) {
+            System.out.println("unable to get a document builder factory");
+            System.exit(2);
+        } catch (ParserConfigurationException e) {
+            System.out.println("parser was unable to be configured");
+            System.exit(2);
+        } catch (SAXException e) {
+            System.out.println("sax exception");
+            System.exit(2);
+        } catch (IOException e ) {
+            System.out.println("IO exception");
+            System.exit(2);
+        }
+
+		request.setAttribute("result", itemXMLString);
+        
+        request.setAttribute("ItemResult", item);
 		request.getRequestDispatcher("/item.jsp").forward(request, response);
     }
 	
@@ -30,4 +60,20 @@ public class ItemServlet extends HttpServlet implements Servlet {
 		}
 		return str;
 	}
+
+    public static Document loadXMLFromString(String xml) 
+        throws FactoryConfigurationError, ParserConfigurationException, 
+                          SAXException, IOException
+    {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        if(xml == null)
+            xml = "";
+
+        InputSource is = new InputSource(new StringReader(xml));
+        
+        return builder.parse(is);
+    }
+
+    
 }
