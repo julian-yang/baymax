@@ -37,17 +37,13 @@ public class SearchServlet extends HttpServlet implements Servlet {
 		SearchResult[] results = AuctionSearchClient.basicSearch(q, numResultsToSkip, numResultsToReturn);
 		request.setAttribute("results", results);
 		
+		// pass down request data
 		request.setAttribute("q", q);
 		request.setAttribute("numResultsToSkip", numResultsToSkip);
 		request.setAttribute("numResultsToReturn", numResultsToReturn);
 		request.setAttribute("numResultsReturned", results.length);
-		/*
-		String allResults = "";
-		for(SearchResult result : results) {
-			allResults += "(" + result.getItemId() + ", " + result.getName() + ")<br>";
-		}
-		request.setAttribute("message", allResults);
-		*/
+		// set boolean attribute to true if there are more unseen items
+		request.setAttribute("hasMore", AuctionSearchClient.basicSearch(q, numResultsToSkip+numResultsToReturn, 1).length==1);
 		
 		request.getRequestDispatcher("/search.jsp").forward(request, response);
 		

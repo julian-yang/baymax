@@ -10,7 +10,6 @@
 		<form action="/eBay/search" method="GET">
             <span>Enter search text:</span>
             <input name="q" type="text">
-            <!-- TODO: set these hidden fields with Javascript or something -->
             <input name="numResultsToSkip" type="hidden" value="0">
             <input name="numResultsToReturn" type="hidden" value="10">
             <input type="submit">
@@ -31,26 +30,31 @@
 		<a id="next" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Next</a>
 		
 		<script type="text/javascript">
+		
+			// grab request data
 			var q = "${q}";
 			var numResultsToSkip = parseInt("${numResultsToSkip}");
 			var numResultsToReturn = parseInt("${numResultsToReturn}");
 			var numResultsReturned = parseInt("${numResultsReturned}");
-			
-			//var url = "search?q=${q}&numResultsToSkip=" + 0 + "&numResultsToReturn=${numResultsToReturn}";
+			var hasMore = ${hasMore};
 
+			// set up "previous" link
 			var previous = document.getElementById("previous");
 			previous.innerHTML = "Previous"			
 			previous.href = "search?q=${q}&numResultsToSkip=" + (numResultsToSkip-numResultsToReturn) + "&numResultsToReturn=${numResultsToReturn}";
 			
+			// set up "next" link
 			var next = document.getElementById("next");
 			next.innerHTML = "Next";
 			next.href = "search?q=${q}&numResultsToSkip=" + (numResultsToSkip+numResultsToReturn) + "&numResultsToReturn=${numResultsToReturn}";
 			
+			// if no results skipped, hide "previous" link
 			if(numResultsToSkip <= 0) {
 				previous.innerHTML = "";
 			}
 			
-			if(numResultsReturned < numResultsToReturn) {
+			// if no results remaining, hide "next" link
+			if(!hasMore) {
 				next.innerHTML = "";
 			}
 			
