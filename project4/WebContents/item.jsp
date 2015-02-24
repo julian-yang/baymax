@@ -50,7 +50,7 @@
     </head>
 	
 	<!-- provide location string using JSP to onload initialize() method below -->
-    <body onload="initialize('Los Angeles')">
+    <body onload="initialize('${ItemResult.location}')">
 		<a href="/eBay">Home</a>
 		
 		<form action="/eBay/item" method="GET">
