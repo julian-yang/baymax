@@ -25,6 +25,8 @@
             </c:forEach>
         </ul>
 		
+		${suggestions}
+
 		<br>
 		<a id="previous" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Previous</a>
 		<a id="next" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Next</a>
