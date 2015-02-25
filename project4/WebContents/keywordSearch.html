@@ -1,5 +1,8 @@
 <html>
-    <head><title>Query Search!</title></head>
+    <head>
+        <title>Query Search!</title>
+        <link rel="stylesheet" type="text/css" href="eBay.css">
+    </head>
     <body>
         <h1>Query Search!</h1>
 
@@ -7,11 +10,23 @@
 		<br>
 		
         <form action="/eBay/search" method="GET">
-            <span>Enter search text:</span>
-            <input name="q" type="text">
+            <div class="queryContainer">
+                <div>
+                    <span>Enter search text:</span><br/>
+                    <input id="queryBox" name="q" type="text"
+                        onKeyUp="getSuggestions(this.value);">
+                </div>
+                <div id="suggestions">
+                    <p class="suggestion" onclick="autoFill(this.innerText);">suggestion1</p>
+                    <p class="suggestion" onclick="autoFill(this.innerText);">suggestion2</p>
+                </div>
+            </div>
             <!-- TODO: set these hidden fields with Javascript or something -->
             <input name="numResultsToSkip" type="hidden" value="0">
             <input name="numResultsToReturn" type="hidden" value="10">
             <input type="submit">
         </form>
+
+        <script src="suggest.js"></script>
+        
 </html>

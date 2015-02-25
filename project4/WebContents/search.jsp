@@ -9,7 +9,8 @@
 		
 		<form action="/eBay/search" method="GET">
             <span>Enter search text:</span>
-            <input name="q" type="text">
+            <input name="q" type="text" onKeyUp="getSuggestions(this.value);">
+            <div id="suggestions">test text</div>
             <input name="numResultsToSkip" type="hidden" value="0">
             <input name="numResultsToReturn" type="hidden" value="10">
             <input type="submit">
@@ -25,12 +26,12 @@
             </c:forEach>
         </ul>
 		
-		${suggestions}
 
 		<br>
 		<a id="previous" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Previous</a>
 		<a id="next" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Next</a>
 		
+        <script src="suggest.js"></script>
 		<script type="text/javascript">
 		
 			// grab request data

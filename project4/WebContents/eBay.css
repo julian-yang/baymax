@@ -1,0 +1,15 @@
+.queryContainer {
+    width: 300px;
+}
+
+#queryBox {
+}
+
+div#suggestions p {
+    margin: 2px;
+    
+}
+
+p.suggestion:hover {
+    background-color: yellow;
+}
