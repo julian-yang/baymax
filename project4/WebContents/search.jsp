@@ -3,19 +3,35 @@
 <html>
     <head>
         <title>Search Results!</title>
+        <link rel="stylesheet" type="text/css" href="eBay.css">
     </head>
     <body>
 		<a href="/eBay">Home</a>
 		
 		<form action="/eBay/search" method="GET">
-            <span>Enter search text:</span>
-            <input name="q" type="text" onKeyUp="getSuggestions(this.value);">
-            <div id="suggestions">test text</div>
+            <div class="queryContainer">
+                <div>
+                    <span>Enter search text:</span><br/>
+                    <input id="queryBox" name="q" type="text">
+                    <input id="submit" type="submit">
+                </div>
+            </div>
+            <!-- TODO: set these hidden fields with Javascript or something -->
             <input name="numResultsToSkip" type="hidden" value="0">
             <input name="numResultsToReturn" type="hidden" value="10">
-            <input type="submit">
+            
         </form>
-	
+        <script src="autosuggest.js"></script>
+        <script src="suggestions.js"></script>
+        <script type="text/javascript">
+            window.onload = function () {
+                var oTextbox = 
+                    new AutoSuggestControl(document.getElementById("queryBox"),
+                new GoogleSuggestions());
+            }
+        </script>
+        
+        <!--- Results --->
         <ul>
             <c:forEach var="result" items="${results}">
                 <li>
@@ -31,7 +47,6 @@
 		<a id="previous" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Previous</a>
 		<a id="next" href="search?q=test&numResultsToSkip=0&numResultsToReturn=10">Next</a>
 		
-        <script src="suggest.js"></script>
 		<script type="text/javascript">
 		
 			// grab request data
