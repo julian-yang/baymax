@@ -28,7 +28,14 @@ public class ItemServlet extends HttpServlet implements Servlet {
 		
 		// get XML data of item
 		String itemXMLString = AuctionSearchClient.getXMLDataForItemId(id);
-    
+        request.setAttribute("result", itemXMLString);
+        
+        // if string is empty, don't need to try to parse it.
+        if(itemXMLString == null || itemXMLString.isEmpty()) {
+            request.setAttribute("result", "");
+            request.getRequestDispatcher("/item.jsp").forward(request, response);
+            return;
+        }
         ItemResult item = new ItemResult();
         try {
 		    Element itemElem = loadXMLFromString(itemXMLString).getDocumentElement();
@@ -47,10 +54,10 @@ public class ItemServlet extends HttpServlet implements Servlet {
             System.exit(2);
         }
 
-		request.setAttribute("result", itemXMLString);
-        
+		        
         request.setAttribute("ItemResult", item);
 		request.getRequestDispatcher("/item.jsp").forward(request, response);
+        
     }
 	
 	// given a string, return empty string if it is null; otherwise, return as is
