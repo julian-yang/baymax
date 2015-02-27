@@ -31,6 +31,10 @@
             }
         </script>
         
+		<c:if test="${empty results}">
+			<strong>No results found!</strong>
+		</c:if>
+		
         <!--- Results --->
         <ul>
             <c:forEach var="result" items="${results}">
