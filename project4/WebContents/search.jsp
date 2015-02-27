@@ -32,7 +32,8 @@
         </script>
         
 		<c:if test="${empty results}">
-			<strong>No results found!</strong>
+			<h1>No results found!</h1>
+			<p>No items matched your search query</p>
 		</c:if>
 		
         <!--- Results --->

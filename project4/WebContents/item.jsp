@@ -20,7 +20,7 @@
 				map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 				
 				// if address parameter is provided, translate it to latitude/longitude via geocoding and set zoom level
-				if(typeof address !== 'undefined') {
+				if(typeof address !== 'undefined' && address !== null) {
 					codeAddress(address, 14);
 				}
 			}
