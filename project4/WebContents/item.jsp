@@ -106,7 +106,14 @@
                         </c:forEach>
                     </ol>
                 </p>
-                <p>Coordinates: ${ItemResult.latitude}, ${ItemResult.longitude}</p>
+                <c:choose>
+                    <c:when test="${empty ItemResult.latitude and empty ItemResult.longitude}">
+                        <p>Coordinates: Not Available</p>
+                    </c:when>
+                    <c:otherwise>
+                        <p>Coordinates: ${ItemResult.latitude}, ${ItemResult.longitude}</p>
+                    </c:otherwise>
+                </c:choose>
                 <p>Location: ${ItemResult.location} </p>
                 <p>Country: ${ItemResult.country} </p>
                 <p>Started: ${ItemResult.started} </p>
