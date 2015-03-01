@@ -69,7 +69,6 @@
 	
 	<!-- provide location string using JSP to onload initialize() method below -->
     <body onload="initialize('${ItemResult.latitude}', '${ItemResult.longitude}', '${fn:replace(ItemResult.location, singleQuotes, singleQuotesReplace)} ${fn:replace(ItemResult.country, singleQuotes, singleQuotesReplace)}')">
-<!-- c:out value="\"${ItemResult.location}\""/>" -->
 		<a href="/eBay">Home</a>
 		
 		<form action="/eBay/item" method="GET">
@@ -125,14 +124,7 @@
                         </c:forEach>
                     </ol>
                 </p>
-                <c:choose>
-                    <c:when test="${empty ItemResult.latitude and empty ItemResult.longitude}">
-                        <p>Coordinates: Not Available</p>
-                    </c:when>
-                    <c:otherwise>
-                        <p>Coordinates: ${ItemResult.latitude}, ${ItemResult.longitude}</p>
-                    </c:otherwise>
-                </c:choose>
+                <p>Coordinates: ${ItemResult.latitude}, ${ItemResult.longitude}</p>
                 <p>Location: ${ItemResult.location} </p>
                 <p>Country: ${ItemResult.country} </p>
                 <p>Started: ${ItemResult.started} </p>
