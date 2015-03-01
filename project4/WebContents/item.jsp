@@ -9,18 +9,25 @@
 		<script type="text/javascript">
 			var geocoder;
 			var map;
-			function initialize(address) {
+			function initialize(lat, lon, address) {
+				var customLocation = false;
 				geocoder = new google.maps.Geocoder();
 				var latlng = new google.maps.LatLng(39.50, -98.35);
+				var zoom = 2;
+				// if latitude/longitude are provided, use that as center location
+				if(!isNullOrUndefined(lat) && lat.length > 0 && !isNullOrUndefined(lon) && lon.length > 0) {
+					latlng = new google.maps.LatLng(lat, lon);
+					zoom = 14;
+					customLocation = true;
+				}
 				var mapOptions = {
-					zoom: 2, // default: 8 
+					zoom: zoom, // default: 8 
 					center: latlng,
 					mapTypeId: google.maps.MapTypeId.ROADMAP
 				};
 				map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-				
-				// if address parameter is provided, translate it to latitude/longitude via geocoding and set zoom level
-				if(typeof address !== 'undefined' && address !== null) {
+				// if address parameter is provided instead of lat/lon, translate it to latitude/longitude via geocoding and set zoom level
+				if(!customLocation && !isNullOrUndefined(address)) {
 					codeAddress(address, 14);
 				}
 			}
@@ -46,11 +53,15 @@
 					}
 				});
 			}
+			
+			function isNullOrUndefined(temp) {
+				return temp === null || typeof temp === 'undefined';
+			}
 		</script> 
     </head>
 	
 	<!-- provide location string using JSP to onload initialize() method below -->
-    <body onload="initialize('${ItemResult.location} ${ItemResult.country}')">
+    <body onload="initialize('${ItemResult.latitude}', '${ItemResult.longitude}', '${ItemResult.location} ${ItemResult.country}')">
 		<a href="/eBay">Home</a>
 		
 		<form action="/eBay/item" method="GET">
