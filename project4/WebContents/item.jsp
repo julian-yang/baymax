@@ -1,4 +1,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+<c:set var="singleQuotes">'</c:set>
+<c:set var="singleQuotesReplace">\'</c:set> 
 
 <html>
 
@@ -11,14 +15,17 @@
 			var map;
 			function initialize(lat, lon, address) {
 				var customLocation = false;
+				var latlng;
 				geocoder = new google.maps.Geocoder();
-				var latlng = new google.maps.LatLng(39.50, -98.35);
 				var zoom = 2;
-				// if latitude/longitude are provided, use that as center location
+				// if latitude/longitude are provided, use that as center location; otherwise, use USA coordinates
 				if(!isNullOrUndefined(lat) && lat.length > 0 && !isNullOrUndefined(lon) && lon.length > 0) {
 					latlng = new google.maps.LatLng(lat, lon);
 					zoom = 14;
 					customLocation = true;
+				}
+				else {
+					latlng = new google.maps.LatLng(39.50, -98.35);
 				}
 				var mapOptions = {
 					zoom: zoom, // default: 8 
@@ -61,7 +68,8 @@
     </head>
 	
 	<!-- provide location string using JSP to onload initialize() method below -->
-    <body onload="initialize('${ItemResult.latitude}', '${ItemResult.longitude}', '${ItemResult.location} ${ItemResult.country}')">
+    <body onload="initialize('${ItemResult.latitude}', '${ItemResult.longitude}', '${fn:replace(ItemResult.location, singleQuotes, singleQuotesReplace)} ${fn:replace(ItemResult.country, singleQuotes, singleQuotesReplace)}')">
+<!-- c:out value="\"${ItemResult.location}\""/>" -->
 		<a href="/eBay">Home</a>
 		
 		<form action="/eBay/item" method="GET">
