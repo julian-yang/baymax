@@ -25,7 +25,7 @@
 				}
 			}
 			
-			function codeAddress(address, zoom) {
+			function codeAddress(address, zoom) {				
 				geocoder.geocode( {'address': address}, function(results, status) {
 					if(status == google.maps.GeocoderStatus.OK) {
 						map.setCenter(results[0].geometry.location);
@@ -50,7 +50,7 @@
     </head>
 	
 	<!-- provide location string using JSP to onload initialize() method below -->
-    <body onload="initialize('${ItemResult.location}')">
+    <body onload="initialize('${ItemResult.location} ${ItemResult.country}')">
 		<a href="/eBay">Home</a>
 		
 		<form action="/eBay/item" method="GET">
