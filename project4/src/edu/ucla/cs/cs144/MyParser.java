@@ -439,8 +439,9 @@ class MyParser {
         bidResults = bidsArrayList.toArray(bidResults);
 
         return new ItemResult(itemId, name, categories, currently, buyPrice,
-                firstBid, numberOfBids, bidResults, location, country, started, 
-                ends, sellerId, sellerRating, description);
+                firstBid, numberOfBids, bidResults, longitude, latitude, 
+                location, country, started, ends, sellerId, sellerRating, 
+                description);
     }
     
     static void writeUsersToFile() {

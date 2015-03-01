@@ -9,6 +9,8 @@ public class ItemResult {
     private  String firstBid;
     private  String numberOfBids;
     private  BidResult[] bids;
+    private  String longitude;
+    private  String latitude;
     private  String location;
     private  String country;
     private  String started;
@@ -21,8 +23,8 @@ public class ItemResult {
     
     public ItemResult(String itemId, String name, String[] categories, 
             String currently, String buyPrice, String firstBid, String numberOfBids,
-            BidResult[] bids, String location, String country, String started, 
-            String ends, String sellerId, String sellerRating, 
+            BidResult[] bids, String longitude, String latitude, String location, 
+            String country, String started, String ends, String sellerId, String sellerRating, 
             String description) {
         this.itemId = itemId;
         this.name = name;
@@ -32,6 +34,8 @@ public class ItemResult {
         this.firstBid = firstBid;
         this.numberOfBids = numberOfBids;
         this.bids = bids;
+        this.longitude = longitude;
+        this.latitude = latitude;
         this.location = location;
         this.country = country;
         this.started = started;
@@ -72,6 +76,14 @@ public class ItemResult {
     
     public BidResult[] getBids() {
         return bids;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public String getLatitude() {
+        return latitude;
     }
 
     public String getLocation() {

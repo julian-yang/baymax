@@ -69,7 +69,6 @@
             <c:otherwise>
                 <div id ="map_canvas" style="width: 300px; height: 250px"></div>
 		        <br>
-
                 <h1>${ItemResult.name}</h1>
                 <p>ID#${ItemResult.itemId}</p>
                 <p>Description: ${ItemResult.description} </p>
@@ -107,6 +106,7 @@
                         </c:forEach>
                     </ol>
                 </p>
+                <p>Coordinates: ${ItemResult.latitude}, ${ItemResult.longitude}</p>
                 <p>Location: ${ItemResult.location} </p>
                 <p>Country: ${ItemResult.country} </p>
                 <p>Started: ${ItemResult.started} </p>
