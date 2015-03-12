@@ -10,6 +10,9 @@
 		<a href="/eBay">Home</a>
 		
         <c:choose>
+            <c:when test="${not isSecure}">
+                <c:redirect url="${secureLink}"/>
+            </c:when>
             <c:when test="${empty ItemResult}">
                 <h1>Please access this form through the "Buy Now" link on the 
                     item's info page. </h1>
@@ -21,15 +24,17 @@
             </c:when>
             <c:otherwise>
                 <h1>Purchasing: ${ItemResult.name}</h1>
+                <%--
+                <p> redirect link: ${secureLink}</p>
                 <p>Is secure: ${isSecure}</p>
-                
-                <p>ItemID: ${ItemResult.itemId}</p>
-                <p>ItemName: ${ItemResult.name}</p>
-                <p>BuyPrice: ${ItemResult.buyPrice}</p>
+                --%>
+                <p>Item ID: ${ItemResult.itemId}</p>
+                <p>Item Name: ${ItemResult.name}</p>
+                <p>Buy Price: ${ItemResult.buyPrice}</p>
                 <form action="/eBay/confirm" method="POST">
                     <span>Credit Card #: </span> 
                     <input name="creditCard" type="text">
-                    <input value="Purchase" type="submit">
+                    <input value="Submit" type="submit">
                 </form>
             </c:otherwise>
         </c:choose>
