@@ -31,6 +31,10 @@ public class ConfirmServlet extends HttpServlet implements Servlet {
         request.setAttribute("ItemResult", item);
         request.setAttribute("isSecure", request.isSecure());
 		
+        //request.setAttribute("isSecure", request.isSecure());
+        //String itemLink = "http://" + request.getServerName() + ":1448/eBay/item?id=";
+        //request.setAttribute("itemLink", itemLink);
+        
 		// set credit card attribute
 		String cc = request.getParameter("creditCard");
 		request.setAttribute("creditCard", cc);

@@ -28,6 +28,8 @@ public class PurchaseServlet extends HttpServlet implements Servlet {
         Object item = session.getAttribute("ItemResult");
         request.setAttribute("ItemResult", item);
         request.setAttribute("isSecure", request.isSecure());
+        String secureLink = "https://" + request.getServerName() + ":8443/eBay/purchase";
+        request.setAttribute("secureLink", secureLink);
         request.getRequestDispatcher("/purchase.jsp").forward(request, response);
     }
 }
