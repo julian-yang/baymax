@@ -7,6 +7,8 @@
     </head>
 
     <body>
+		<a href="/eBay">Home</a>
+		
         <c:choose>
             <c:when test="${empty ItemResult.buyPrice}">
                 <h1>Could Not Purchase</h1>
