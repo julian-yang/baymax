@@ -7,6 +7,8 @@
     </head>
 
     <body>
+		<a href="/eBay">Home</a>
+		
         <c:choose>
             <c:when test="${empty ItemResult}">
                 <h1>Please access this form through the "Buy Now" link on the 
@@ -27,7 +29,7 @@
                 <form action="/eBay/confirm" method="POST">
                     <span>Credit Card #: </span> 
                     <input name="creditCard" type="text">
-                    <input type="submit">
+                    <input value="Purchase" type="submit">
                 </form>
             </c:otherwise>
         </c:choose>
