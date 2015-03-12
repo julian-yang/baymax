@@ -28,6 +28,19 @@ public class ConfirmServlet extends HttpServlet implements Servlet {
         Object item = session.getAttribute("ItemResult");
         request.setAttribute("ItemResult", item);
         request.setAttribute("isSecure", request.isSecure());
+		
+		// set credit card attribute
+		String cc = request.getParameter("creditCard");
+		request.setAttribute("creditCard", cc);
+		
+		// set current date and time attribute
+		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		Date date = new Date();
+		request.setAttribute("transactionTime", dateFormat.format(date));
+		
+		// remove item from session; it's already purchased
+		session.removeAttribute("ItemResult");
+		
         request.getRequestDispatcher("/confirm.jsp").forward(request, response);
     }
 }
