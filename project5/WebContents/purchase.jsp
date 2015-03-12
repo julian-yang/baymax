@@ -11,6 +11,7 @@
             <c:when test="${empty ItemResult}">
                 <h1>Please access this form through the "Buy Now" link on the 
                     item's info page. </h1>
+            </c:when>
             <c:when test="${empty ItemResult.buyPrice}">
                 <h1>Not Available for Purchasing</h1>
                 <p>Sorry, this item is not available for immediate purchase.</p>
