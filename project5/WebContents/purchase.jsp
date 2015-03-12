@@ -26,7 +26,7 @@
                 <form action="/eBay/confirm" method="POST">
                     <span>Credit Card #: </span> 
                     <input name="creditCard" type="text">
-                    <input type="submit">
+                    <input name="Purchase" type="submit">
                 </form>
             </c:otherwise>
         </c:choose>
