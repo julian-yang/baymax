@@ -7,7 +7,7 @@
     </head>
 
     <body>
-		<a href="/eBay">Home</a>
+		<a href="${homeLink}">Home</a>
 		
         <c:choose>
             <c:when test="${not isSecure}">

@@ -47,6 +47,16 @@ public class ConfirmServlet extends HttpServlet implements Servlet {
 		// remove item from session; it's already purchased
 		session.removeAttribute("ItemResult");
 		
+		// going back to home page uses unencrypted HTTP
+		String homeLink = "http://" + request.getServerName() + ":1448/eBay";
+		request.setAttribute("homeLink", homeLink);
+		
         request.getRequestDispatcher("/confirm.jsp").forward(request, response);
     }
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+        response.sendRedirect("");
+    }
+	
 }

@@ -26,10 +26,17 @@ public class PurchaseServlet extends HttpServlet implements Servlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(true);
         Object item = session.getAttribute("ItemResult");
+		
         request.setAttribute("ItemResult", item);
         request.setAttribute("isSecure", request.isSecure());
+		
         String secureLink = "https://" + request.getServerName() + ":8443/eBay/purchase";
         request.setAttribute("secureLink", secureLink);
+		
+		// going back to home page uses unencrypted HTTP
+		String homeLink = "http://" + request.getServerName() + ":1448/eBay";
+		request.setAttribute("homeLink", homeLink);
+		
         request.getRequestDispatcher("/purchase.jsp").forward(request, response);
     }
 }
